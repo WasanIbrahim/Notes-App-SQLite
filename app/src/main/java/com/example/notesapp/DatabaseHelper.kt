@@ -7,11 +7,11 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 //increase version if more column/features added to db
-class DatabaseHelper(context: Context): SQLiteOpenHelper(context,"details.db",null,2) {
+class DatabaseHelper(context: Context): SQLiteOpenHelper(context,"details.db",null,3) {
     private val sqLiteDatabase: SQLiteDatabase = writableDatabase
 
     override fun onCreate(db: SQLiteDatabase?) {
-            db?.execSQL("create table notes (Note text)")
+            db?.execSQL("create table notes (pk INTEGER PRIMARY KEY AUTOINCREMENT, Note text)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -36,10 +36,23 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context,"details.db",nu
         }
         else{
             while (cursor.moveToNext()){ //iterate through table and populate notes array list
-                val note = cursor.getString(0) // integer value refers to the column
-                notes.add(Notes(note))
+                val pk = cursor.getInt(0)
+                val note = cursor.getString(1) // integer value refers to the column
+                notes.add(Notes(pk,note))
             }
         }
         return notes
+    }
+
+
+    fun updateData(pk:Int, newNote: String){
+        val contentValues = ContentValues()
+
+        contentValues.put("Note", newNote)
+        sqLiteDatabase.update("notes", contentValues,"pk = ?", arrayOf(pk.toString()))
+    }
+
+    fun deleteData(pk: Int){
+        sqLiteDatabase.delete("notes", "pk = ?",arrayOf(pk.toString()))
     }
 }

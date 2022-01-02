@@ -1,16 +1,16 @@
 package com.example.notesapp
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notesapp.databinding.ItemRowBinding
 
-class RecyclerViewAdapter:RecyclerView.Adapter<RecyclerViewAdapter.ItemViewHolder>() {
+class RecyclerViewAdapter(private val activity: MainActivity):RecyclerView.Adapter<RecyclerViewAdapter.ItemViewHolder>() {
 
-     var notesList = emptyList<Notes>()
-
+    var notesList = emptyList<Notes>()
     class ItemViewHolder(val binding: ItemRowBinding):RecyclerView.ViewHolder(binding.root)
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         return ItemViewHolder(
@@ -21,10 +21,28 @@ class RecyclerViewAdapter:RecyclerView.Adapter<RecyclerViewAdapter.ItemViewHolde
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val notes = notesList[position]
 
-
         holder.binding.apply {
             val note = "${notes.note}"
             noteText.text = note
+
+
+            noteText.setOnClickListener {
+                activity.selectedNote = notes
+                activity.updateFields()
+                Toast.makeText(activity, "${notes.note} is selected", Toast.LENGTH_LONG).show()
+
+            }
+            deleteButton.setOnClickListener {
+                activity.delete(notes.pk)
+            }
+
+            editButton.setOnClickListener {
+
+                val intent = Intent(holder.itemView.context, UpdateActivity::class.java)
+                intent.putExtra("pk", notes.pk)
+                intent.putExtra("note", notes.note)
+                holder.itemView.context.startActivity(intent)
+            }
         }
     }
 
